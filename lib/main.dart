@@ -7,7 +7,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Resistencias',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -26,22 +27,6 @@ class _MyHomePageState extends State<MyHomePage> {
   static List<Colores> barra2 = Colores.getColoresVal();
   static List<Colores> barraMultiplicador = Colores.getColoresMulti();
   static List<Colores> barraTolerancias = Colores.getColoresTol();
-  static Map<String, dynamic> mapa1 = {
-    'nombre': 'valoresUno',
-    'colores': barra1
-  };
-  static Map<String, dynamic> mapa2 = {
-    'nombre': 'valoresDos',
-    'colores': barra2,
-  };
-  static Map<String, dynamic> mapaMult = {
-    'nombre': 'mult',
-    'colores': barraMultiplicador,
-  };
-  static Map<String, dynamic> mapaTol = {
-    'nombre': 'valoresDos',
-    'colores': barraTolerancias
-  };
 
   int valor1 = 0;
   int valor2 = 0;
@@ -49,34 +34,113 @@ class _MyHomePageState extends State<MyHomePage> {
   int tolIndex = 0;
   double valFin = 0.0;
   String prefijo = '';
+  String texto = '0 Ω';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('ListWheelScrollView demo'),
-      ),
-      body: Column(
-        children: <Widget>[
-          _textos(),
-          Container(
-            padding: EdgeInsets.all(10.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(child: _barraUno()),
-                Expanded(child: _barraDos()),
-                Expanded(child: _barraMultiplicador()),
-                Expanded(child: _barraTolerancias()),
-              ],
-            ),
-          ),
-          Text('${valFin.toStringAsFixed(2)} $prefijo'),
-        ],
+    return Center(
+      child: RaisedButton(
+        child: const Text('showModalBottomSheet'),
+        onPressed: () {
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                height: 300,
+                color: Colors.amber,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('Modal BottomSheet'),
+                      RaisedButton(
+                        child: const Text('Close BottomSheet'),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      agregarResistencia(),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
 
-  _calcularResistencia() {
+  Widget bottomSheetSimple(BuildContext context) {
+    return Center(
+      child: RaisedButton(
+        child: const Text('showModalBottomSheet'),
+        onPressed: () {},
+      ),
+    );
+  }
+
+  displayBottomSheet() {
+    double heightOfModalBottomSheet = 100;
+    int value1 = 0;
+    showModalBottomSheet(
+      backgroundColor: Colors.blueGrey,
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context,
+              StateSetter setStateUp /*You can rename this!*/) {
+            return agregarResistencia();
+          },
+        );
+      },
+    );
+  }
+
+  Widget agregarResistencia() {
+    return Column(
+      children: <Widget>[
+        _textos(),
+        Container(
+          padding: EdgeInsets.all(10.0),
+          child: Row(
+            children: <Widget>[
+              Expanded(child: _barraUno()),
+              Expanded(child: _barraDos()),
+              Expanded(child: _barraMultiplicador()),
+              Expanded(child: _barraTolerancias()),
+            ],
+          ),
+        ),
+        Container(
+            child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Container(child: Text('$texto')),
+              ),
+            ),
+            Expanded(
+              child: FlatButton(
+                onPressed: () {
+                  setState(() {});
+                },
+                child: Row(
+                  children: <Widget>[
+                    Text('Guardar'),
+                    SizedBox(width: 30.0),
+                    Icon(Icons.save),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        )),
+      ],
+    );
+  }
+
+  String calcularResistencia() {
     String tol = barraTolerancias[tolIndex].tolerancia;
     String valorRes = '';
     int val;
@@ -100,9 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
       valFin = valor;
       prefijo = 'Ω $tol';
     }
-
-    setState(() {});
-    // valorInt * barraMultiplicador[multiplicador].multiplicador.toInt());
+    return '${valFin.toStringAsFixed(2)} $prefijo';
   }
 
   Widget _textos() {
@@ -128,43 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _barra(List<Colores> lista) {
-    int _index = 0;
-    return SizedBox(
-      height: 80, // card height
-      width: 80,
-      child: PageView.builder(
-        itemCount: lista.length,
-        scrollDirection: Axis.vertical,
-        controller: PageController(viewportFraction: 0.7, keepPage: true),
-        onPageChanged: (int index) => setState(() {
-          _index = index;
-          valor1 = index;
-          _calcularResistencia();
-        }),
-        itemBuilder: (context, i) {
-          return Container(
-            child: Card(
-              color: lista[i].color,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Center(
-                child: Text(
-                  lista[i].nombre,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: i == 0 ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _barraUno() {
+  Widget _barraUno( ) {
     int _index = 0;
     return SizedBox(
       height: 80, // card height
@@ -176,14 +202,14 @@ class _MyHomePageState extends State<MyHomePage> {
         onPageChanged: (int index) => setState(() {
           _index = index;
           valor1 = index;
-          _calcularResistencia();
+          texto  = calcularResistencia();
         }),
         itemBuilder: (context, i) {
           return Container(
             child: Card(
               color: barra1[i].color,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(1)),
               child: Center(
                 child: Text(
                   barra1[i].nombre,
@@ -200,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _barraDos() {
+  Widget _barraDos( ) {
     int _index = 0;
     return SizedBox(
       height: 80, // card height
@@ -212,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPageChanged: (int index) => setState(() {
           _index = index;
           valor2 = index;
-          _calcularResistencia();
+          texto  = calcularResistencia();
         }),
         itemBuilder: (context, i) {
           return Container(
@@ -236,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _barraMultiplicador() {
+  Widget _barraMultiplicador( ) {
     int _index = 0;
     return SizedBox(
       height: 80, // card height
@@ -248,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPageChanged: (int index) => setState(() {
           _index = index;
           mIndex = index;
-          _calcularResistencia();
+          texto  = calcularResistencia();
         }),
         itemBuilder: (context, i) {
           return Container(
@@ -272,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _barraTolerancias() {
+  Widget _barraTolerancias( ) {
     int _index = 0;
     return SizedBox(
       height: 80, // card height
@@ -282,9 +308,9 @@ class _MyHomePageState extends State<MyHomePage> {
         scrollDirection: Axis.vertical,
         controller: PageController(viewportFraction: 0.7),
         onPageChanged: (int index) => setState(() {
-          _index = index;
+          _index   = index;
           tolIndex = index;
-          _calcularResistencia();
+          texto    = calcularResistencia();
         }),
         itemBuilder: (context, i) {
           return Container(
@@ -304,44 +330,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class MyItem extends StatelessWidget {
-  final int index;
-
-  MyItem({@required this.index, Key key}) : super(key: key);
-
-  static const colors = [
-    Colors.pink,
-    Colors.indigo,
-    Colors.grey,
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.yellow,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        color: colors[index % colors.length],
-        child: Center(
-          child: RaisedButton(
-            color: colors[index % colors.length],
-            onPressed: () {
-              print('boton presionado');
-            },
-            child: Text(
-              '$index',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
       ),
     );
   }
